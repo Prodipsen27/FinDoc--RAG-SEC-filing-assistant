@@ -1,0 +1,63 @@
+services:
+  # ──────────────────────────────────────────────────────────────
+  # Backend — Node.js API (Express + LangGraph.js)
+  # ──────────────────────────────────────────────────────────────
+  - type: web
+    name: findoc-backend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node src/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8000"
+      # Set these in the Render dashboard — do NOT commit real values here
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_CHAT_MODEL
+        value: gpt-4o-mini
+      - key: OPENAI_GROUNDING_MODEL
+        value: gpt-4o-mini
+      - key: OPENAI_EMBEDDING_MODEL
+        value: text-embedding-3-small
+      - key: OPENAI_EMBEDDING_DIMENSIONS
+        value: "1536"
+      - key: ALLOWED_ORIGINS
+        sync: false
+
+  # ──────────────────────────────────────────────────────────────
+  # Frontend — Vite React SPA served via Caddy in Docker
+  # ──────────────────────────────────────────────────────────────
+  - type: web
+    name: findoc-frontend
+    runtime: docker
+    region: oregon
+    plan: free
+    rootDir: frontend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "3000"
+      # Build-time ARGs — used during `pnpm build` inside Docker
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
