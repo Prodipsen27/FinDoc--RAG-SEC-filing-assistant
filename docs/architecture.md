@@ -1,6 +1,33 @@
 # Architecture
 
-Document Copilot is an internal research assistant for analysts who need grounded answers from a curated SEC filing corpus. Every answer must be backed by retrieved source passages.
+```mermaid
+graph TD
+    subgraph Frontend
+        SPA[React SPA]
+    end
+    subgraph Backend
+        Express[Express API Server]
+        LangGraph[LangGraph Agent Orchestration]
+    end
+    subgraph Database
+        Postgres[(Supabase Postgres)]
+        FTS[Full Text Search]
+        Vector[pgvector]
+    end
+    subgraph AI Services
+        Gemini[Google Gemini API]
+        GitHub[GitHub Models / OpenAI API]
+    end
+
+    SPA <-->|Auth / Session| Postgres
+    SPA <-->|SSE Chat Stream / HTTP API| Express
+    Express <-->|Agent Loop & Tools| LangGraph
+    Express <-->|SQL Queries / Embeddings| Postgres
+    Express -->|Embeddings Request| Gemini
+    Express <-->|Reasoning & Grounding| GitHub
+```
+
+FinDoc AI is an internal research assistant for analysts who need grounded answers from a curated SEC filing corpus. Every answer must be backed by retrieved source passages.
 
 This architecture uses a thin React client and a Node.js backend.
 
