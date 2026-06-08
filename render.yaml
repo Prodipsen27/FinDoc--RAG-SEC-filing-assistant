@@ -1,6 +1,7 @@
 services:
   # ──────────────────────────────────────────────────────────────
   # Backend — Node.js API (Express + LangGraph.js)
+  # Frontend is hosted separately on Vercel (free tier)
   # ──────────────────────────────────────────────────────────────
   - type: web
     name: findoc-backend
@@ -37,27 +38,6 @@ services:
         value: text-embedding-3-small
       - key: OPENAI_EMBEDDING_DIMENSIONS
         value: "1536"
+      # Include both localhost (dev) and the Vercel production URL
       - key: ALLOWED_ORIGINS
-        sync: false
-
-  # ──────────────────────────────────────────────────────────────
-  # Frontend — Vite React SPA served via Caddy in Docker
-  # ──────────────────────────────────────────────────────────────
-  - type: web
-    name: findoc-frontend
-    runtime: docker
-    region: oregon
-    plan: free
-    rootDir: frontend
-    dockerfilePath: ./Dockerfile
-    healthCheckPath: /health
-    envVars:
-      - key: PORT
-        value: "3000"
-      # Build-time ARGs — used during `pnpm build` inside Docker
-      - key: VITE_API_BASE_URL
-        sync: false
-      - key: VITE_SUPABASE_URL
-        sync: false
-      - key: VITE_SUPABASE_ANON_KEY
-        sync: false
+        value: "http://localhost:5173,https://fin-doc-rag-sec-filing-assistant.vercel.app"
