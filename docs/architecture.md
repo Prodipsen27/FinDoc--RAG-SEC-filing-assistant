@@ -2,29 +2,36 @@
 
 ```mermaid
 graph TD
-    subgraph Frontend
-        SPA[React SPA]
-    end
-    subgraph Backend
-        Express[Express API Server]
-        LangGraph[LangGraph Agent Orchestration]
-    end
-    subgraph Database
-        Postgres[(Supabase Postgres)]
-        FTS[Full Text Search]
-        Vector[pgvector]
-    end
-    subgraph AI Services
-        Gemini[Google Gemini API]
-        GitHub[GitHub Models / OpenAI API]
+    Analyst[Analyst] --> Browser[Browser<br/>React chat app]
+
+    subgraph Railway [Railway Hosting]
+        Vite[Frontend service<br/>Vite build]
+        Express[Backend service<br/>Node.js + Express + LangGraph.js]
     end
 
-    SPA <-->|Auth / Session| Postgres
-    SPA <-->|SSE Chat Stream / HTTP API| Express
-    Express <-->|Agent Loop & Tools| LangGraph
-    Express <-->|SQL Queries / Embeddings| Postgres
-    Express -->|Embeddings Request| Gemini
-    Express <-->|Reasoning & Grounding| GitHub
+    subgraph Supabase [Supabase Platform]
+        Auth[Auth<br/>email session]
+        Postgres[(Postgres<br/>chats, documents, chunks<br/>pgvector + full-text)]
+    end
+
+    subgraph AI [AI Services]
+        Gemini[Google Gemini API<br/>embeddings]
+        OpenAI[OpenAI / GitHub Models<br/>LLM + grounding]
+    end
+
+    Vite -->|serves app| Browser
+    Browser -->|sign in| Auth
+    Auth -->|JWT session| Browser
+    Browser -->|chat request + JWT| Express
+    Express -->|verify user| Auth
+    Express -->|stream answer + citations| Browser
+    Express -->|retrieve passages<br/>persist chats + citations| Postgres
+    
+    SEC[SEC filing corpus] --> Ingest[Ingestion pipeline<br/>scripts/ingest-chunk-and-embed.js]
+    Ingest -->|store documents + chunks| Postgres
+    Ingest -->|create embeddings| Gemini
+    Express -->|embed queries| Gemini
+    Express -->|generate grounded answer| OpenAI
 ```
 
 FinDoc AI is an internal research assistant for analysts who need grounded answers from a curated SEC filing corpus. Every answer must be backed by retrieved source passages.
